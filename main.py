@@ -46,7 +46,6 @@ def scrape_images(keyword, index, num_images=6):
         timestamp = int(time.time() * 1000)  # Milliseconds precision
         save_path = os.path.join(folder_save, f"{timestamp}.jpg")
         download_image(img_url, save_path)
-        print(f"Downloaded {img_url}")
 
 def get_keyword(text, keyword_main=""):
     result = ""
@@ -75,6 +74,12 @@ def get_keyword(text, keyword_main=""):
             result += phrase.text + ", "
     return result
 
+def count_characters_in_text(text):
+    stripped_line = text.strip()
+    if stripped_line:  # Skip empty lines
+        return len(stripped_line), str(len(stripped_line))[0]
+    return 0, 0
+    
 # Usage
 if __name__ == "__main__":
     lines = []
@@ -90,5 +95,9 @@ if __name__ == "__main__":
         if(i == 20):
             break
         keyword = get_keyword(lines[i], keyword_main)
+        len_text, first_character =  count_characters_in_text(lines[i])
+        if(len_text < 100):
+                first_character = 1
         print(i+1, keyword)
-        scrape_images(keyword, i, num_images=6)
+        print(f"Length: {len_text}, Image number: {first_character}")
+        scrape_images(keyword, i, num_images=int(first_character))
