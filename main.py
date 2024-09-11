@@ -29,7 +29,7 @@ def scrape_images(keyword, index, folder_save, num_images=6):
 
     # Tìm tất cả thẻ ảnh từ kết quả trả về
     images = soup.find_all("a", {"class": "iusc"})
-    img_urls = []
+    img_urls = 0
 
     # Lọc các ảnh từ kết quả và lấy URL ảnh lớn
     for image in images:
@@ -38,15 +38,19 @@ def scrape_images(keyword, index, folder_save, num_images=6):
             m = eval(m)  # Chuyển đổi chuỗi JSON thành dictionary
             img_url = m.get("murl")
             if img_url:
-                img_urls.append(img_url)
-            if len(img_urls) >= num_images:
+                timestamp = int(time.time() * 1000)  # Milliseconds precision
+                save_path = os.path.join(folder_segment, f"{timestamp}.jpg")
+                try:
+                    download_image(img_url, save_path)
+                    img_urls += 1
+                except:
+                    print("Error")
+                    pass
+            if img_urls >= num_images:
                 break
 
-    # Tải các ảnh đã tìm thấy
-    for img_url in img_urls:
-        timestamp = int(time.time() * 1000)  # Milliseconds precision
-        save_path = os.path.join(folder_segment, f"{timestamp}.jpg")
-        download_image(img_url, save_path)
+    
+        
 
 def get_keyword(text, keyword_main=""):
     result = ""
@@ -99,41 +103,40 @@ def start_processing():
         return
 
     lines = []
-    try:
-        with open(file_path, 'r', encoding='utf-8') as file:
-            for line in file:
-                if line.strip() == '':
-                    continue
-                else:
-                    lines.append(line.strip())
+    with open(file_path, 'r', encoding='utf-8') as file:
+        for line in file:
+            if line.strip() == '':
+                continue
+            else:
+                lines.append(line.strip())
 
-        label_status.config(text="Đang xử lý...", fg="blue")
-        root.update()  # Cập nhật giao diện
-        keyword_main = get_keyword(lines[0])
-        # Mở file log.txt ở chế độ ghi (write) để làm trống file
-        with open("log.txt", "w", encoding='utf-8') as log_file:
-            log_file.write("")  # Xóa nội dung của file
+    label_status.config(text="Đang xử lý...", fg="blue")
+    root.update()  # Cập nhật giao diện
+    keyword_main = get_keyword(lines[0])
+    # Mở file log.txt ở chế độ ghi (write) để làm trống file
+    with open("log.txt", "w", encoding='utf-8') as log_file:
+        log_file.write("")  # Xóa nội dung của file
+        
+    # Mở file log.txt ở chế độ ghi (append)
+    with open("log.txt", "a", encoding='utf-8') as log_file:
+        for i in range(len(lines)):
+            if i == 20:
+                break
+            keyword = get_keyword(lines[i], keyword_main)
+            len_text, first_character = count_characters_in_text(lines[i])
+            if(len_text < 100):
+                first_character = 1
+            print(i+1, keyword)
+            print(f"Length: {len_text}, Image number: {first_character}")
+            # Ghi vào log.txt
+            log_file.write(f"{i+1}. Keyword: {keyword}\n")
+            log_file.write(f"Length: {len_text}, Image number: {first_character}\n\n")
             
-        # Mở file log.txt ở chế độ ghi (append)
-        with open("log.txt", "a", encoding='utf-8') as log_file:
-            for i in range(len(lines)):
-                if i == 20:
-                    break
-                keyword = get_keyword(lines[i], keyword_main)
-                len_text, first_character = count_characters_in_text(lines[i])
-                if(len_text < 100):
-                    first_character = 1
-                print(i+1, keyword)
-                print(f"Length: {len_text}, Image number: {first_character}")
-                # Ghi vào log.txt
-                log_file.write(f"{i+1}. Keyword: {keyword}\n")
-                log_file.write(f"Length: {len_text}, Image number: {first_character}\n\n")
-                scrape_images(keyword, i, folder_save, num_images=int(first_character))
+            scrape_images(keyword, i, folder_save, num_images=int(first_character))
+            
 
-            label_status.config(text="Xử lý thành công!", fg="green")
-
-    except Exception as e:
-        messagebox.showerror("Lỗi", str(e))
+        label_status.config(text="Xử lý thành công!", fg="green")
+    
 
 # Tạo giao diện
 root = tk.Tk()
