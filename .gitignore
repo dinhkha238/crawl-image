@@ -1,3 +1,5 @@
 /Segment
 .vscode
 venv
+build
+dist
