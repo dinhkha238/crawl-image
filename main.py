@@ -12,10 +12,18 @@ from threading import Thread
 
 # Hàm tải ảnh từ URL
 def download_image(url, file_name):
-    response = requests.get(url)
-    if response.status_code == 200:
-        with open(file_name, 'wb') as f:
-            f.write(response.content)
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            with open(file_name, 'wb') as f:
+                f.write(response.content)
+            return True
+        else:
+            print(f"Error: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"Error")
+        return False
 
 # Function to scrape images by keyword
 def scrape_images(keyword, index, folder_save, num_images=6):
@@ -41,14 +49,36 @@ def scrape_images(keyword, index, folder_save, num_images=6):
             if img_url:
                 timestamp = int(time.time() * 1000)
                 save_path = os.path.join(folder_segment, f"{timestamp}.jpg")
-                try:
-                    download_image(img_url, save_path)
+                if download_image(img_url, save_path):
                     img_urls += 1
-                except:
-                    print("Error")
-                    pass
             if img_urls >= num_images:
+                return
+
+# Hàm tải ảnh với đa luồng
+def process_images_threading(lines, folder_save, keyword_main):
+    threads = []
+
+    with open("log.txt", "a", encoding='utf-8') as log_file:
+        for i, line in enumerate(lines):
+            if i == 20:  # Giới hạn xử lý 20 từ khóa
                 break
+            keyword = get_keyword(line, keyword_main)
+            len_text, first_character = count_characters_in_text(line)
+            if len_text < 100:
+                first_character = 1
+            print(f"{i+1}. Keyword: {keyword}, Image number: {first_character}")
+            
+            # Ghi vào log.txt
+            log_file.write(f"{i+1}. Keyword: {keyword}\n")
+            log_file.write(f"Length: {len_text}, Image number: {first_character}\n\n")
+
+            # Tạo một luồng cho mỗi lần gọi scrape_images
+            thread = Thread(target=scrape_images, args=(keyword, i, folder_save, int(first_character)))
+            threads.append(thread)
+            thread.start()
+            
+    label_status_image.config(text="Xử lý thành công!", fg="green")
+    
 
 def get_keyword(text, keyword_main=""):
     result = ""
@@ -118,39 +148,23 @@ def start_processing():
         messagebox.showerror("Lỗi", "Vui lòng chọn file và thư mục lưu ảnh!")
         return
 
-    def process_images():
-        lines = []
-        with open(file_path, 'r', encoding='utf-8') as file:
-            for line in file:
-                if line.strip() == '':
-                    continue
-                else:
-                    lines.append(line.strip())
+    lines = []
+    with open(file_path, 'r', encoding='utf-8') as file:
+        for line in file:
+            if line.strip() == '':
+                continue
+            else:
+                lines.append(line.strip())
 
-        label_status_image.config(text="Đang xử lý ảnh...", fg="blue")
-        root.update()
-        keyword_main = get_keyword(lines[0])
+    label_status_image.config(text="Đang xử lý...", fg="blue")
+    root.update()
+    keyword_main = get_keyword(lines[0])
 
-        with open("log.txt", "w", encoding='utf-8') as log_file:
-            log_file.write("")
+    # Làm trống file log.txt trước khi ghi
+    with open("log.txt", "w", encoding='utf-8') as log_file:
+        log_file.write("")
 
-        with open("log.txt", "a", encoding='utf-8') as log_file:
-            for i in range(len(lines)):
-                if i == 20:
-                    break
-                keyword = get_keyword(lines[i], keyword_main)
-                len_text, first_character = count_characters_in_text(lines[i])
-                if(len_text < 100):
-                    first_character = 1
-                log_file.write(f"{i+1}. Keyword: {keyword}\n")
-                log_file.write(f"Length: {len_text}, Image number: {first_character}\n\n")
-
-                scrape_images(keyword, i, folder_save, num_images=int(first_character))
-
-            label_status_image.config(text="Xử lý ảnh thành công!", fg="green")
-
-    # Khởi chạy đa luồng cho việc tải ảnh
-    Thread(target=process_images).start()
+    process_images_threading(lines, folder_save, keyword_main)
 
 # Tạo giao diện chính
 root = tk.Tk()
