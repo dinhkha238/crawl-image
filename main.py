@@ -93,12 +93,15 @@ def get_keyword(text, keyword_main=""):
             if phrase.text in keyword_main:
                 continue
             result += phrase.text + ", "
-        result = result + keyword_main 
+        # result = result + keyword_main 
     else:
         for phrase in doc._.phrases[:2]:
             if "Megan" in phrase.text:
                 phrase.text = phrase.text.replace("Megan", "Meghan")
             result += phrase.text + ", "
+    # Xóa dấu phẩy cuối cùng
+    if result.endswith(", "):
+        result = result[:-2]
     return result
 
 def count_characters_in_text(text):
