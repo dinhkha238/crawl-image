@@ -169,6 +169,22 @@ def start_processing():
 
     process_images_threading(lines, folder_save, keyword_main)
 
+# Hàm tải ảnh từ từ khóa
+def start_images_by_keyword():
+    keyword = entry_keyword.get()
+    folder_save = entry_folder_keyword.get()
+    num_images = int(entry_number.get())
+
+    if not keyword or not folder_save:
+        messagebox.showerror("Lỗi", "Vui lòng nhập từ khóa và chọn thư mục lưu ảnh!")
+        return
+
+    label_status_keyword.config(text="Đang xử lý...", fg="blue")
+    root.update()
+
+    scrape_images(keyword, 0, folder_save, num_images)
+    label_status_keyword.config(text="Xử lý thành công!", fg="green")
+
 # Tạo giao diện chính
 root = tk.Tk()
 root.title("Ứng dụng Tải Ảnh & Video")
@@ -235,5 +251,41 @@ button_video.grid(row=2, column=1, padx=10, pady=10)
 label_status_video = tk.Label(frame_video, text="", fg="blue")
 label_status_video.grid(row=3, column=1, padx=10, pady=10)
 
-# Chạy vòng lặp giao diện
+
+# Tạo khung cho tải ảnh theo keyword
+frame_keyword = tk.Frame(root)
+frame_keyword.grid(row=1, column=0, columnspan=2, padx=20, pady=20)
+
+# Nhập keyword
+label_keyword = tk.Label(frame_keyword, text="Nhập từ khóa tìm kiếm ảnh:")
+label_keyword.grid(row=0, column=0, padx=10, pady=10)
+
+entry_keyword = tk.Entry(frame_keyword, width=50)
+entry_keyword.grid(row=0, column=1, padx=10, pady=10)
+
+# Nhập số lượng ảnh
+label_number = tk.Label(frame_keyword, text="Số lượng ảnh:")
+label_number.grid(row=1, column=0, padx=10, pady=10)
+
+entry_number = tk.Entry(frame_keyword, width=10)
+entry_number.grid(row=1, column=1, padx=10, pady=10, sticky='w')
+
+# Chọn thư mục lưu ảnh
+label_folder_keyword = tk.Label(frame_keyword, text="Chọn thư mục lưu ảnh:")
+label_folder_keyword.grid(row=2, column=0, padx=10, pady=10)
+
+entry_folder_keyword = tk.Entry(frame_keyword, width=50)
+entry_folder_keyword.grid(row=2, column=1, padx=10, pady=10)
+
+button_folder_keyword = tk.Button(frame_keyword, text="Chọn thư mục", command=lambda: entry_folder_keyword.insert(0, filedialog.askdirectory()))
+button_folder_keyword.grid(row=2, column=2, padx=10, pady=10)
+
+# Nút bắt đầu tìm và tải ảnh
+button_start_keyword = tk.Button(frame_keyword, text="Tải ảnh theo keyword", command=lambda: Thread(target=start_images_by_keyword).start())
+button_start_keyword.grid(row=3, column=1, padx=10, pady=10)
+
+# Thêm nhãn hiển thị trạng thái tìm ảnh
+label_status_keyword = tk.Label(frame_keyword, text="", fg="blue")
+label_status_keyword.grid(row=4, column=1, padx=10, pady=10)
+
 root.mainloop()
