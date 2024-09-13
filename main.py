@@ -200,7 +200,9 @@ label_file.grid(row=0, column=0, padx=10, pady=10)
 entry_file = tk.Entry(frame_image, width=50)
 entry_file.grid(row=0, column=1, padx=10, pady=10)
 
-button_file = tk.Button(frame_image, text="Chọn file", command=lambda: entry_file.insert(0, filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])))
+button_file = tk.Button(frame_image, text="Chọn file", 
+                                command=lambda: [entry_file.delete(0, tk.END),
+                                                 entry_file.insert(0, filedialog.askopenfilename(filetypes=[("Text files", "*.txt")]))])
 button_file.grid(row=0, column=2, padx=10, pady=10)
 
 # Chọn thư mục lưu ảnh
@@ -210,7 +212,9 @@ label_folder_image.grid(row=1, column=0, padx=10, pady=10)
 entry_folder_image = tk.Entry(frame_image, width=50)
 entry_folder_image.grid(row=1, column=1, padx=10, pady=10)
 
-button_folder_image = tk.Button(frame_image, text="Chọn thư mục", command=lambda: entry_folder_image.insert(0, filedialog.askdirectory()))
+button_folder_image = tk.Button(frame_image, text="Chọn thư mục", 
+                                command=lambda: [entry_folder_image.delete(0, tk.END), 
+                                                 entry_folder_image.insert(0, filedialog.askdirectory())])
 button_folder_image.grid(row=1, column=2, padx=10, pady=10)
 
 # Nút bắt đầu xử lý ảnh từ file
@@ -240,7 +244,9 @@ label_folder_video.grid(row=1, column=0, padx=10, pady=10)
 entry_folder_video = tk.Entry(frame_video, width=50)
 entry_folder_video.grid(row=1, column=1, padx=10, pady=10)
 
-button_folder_video = tk.Button(frame_video, text="Chọn thư mục", command=lambda: entry_folder_video.insert(0, filedialog.askdirectory()))
+button_folder_video = tk.Button(frame_video, text="Chọn thư mục", 
+                                command=lambda: [entry_folder_video.delete(0, tk.END), 
+                                                 entry_folder_video.insert(0, filedialog.askdirectory())])
 button_folder_video.grid(row=1, column=2, padx=10, pady=10)
 
 # Nút tải video
@@ -277,7 +283,9 @@ label_folder_keyword.grid(row=2, column=0, padx=10, pady=10)
 entry_folder_keyword = tk.Entry(frame_keyword, width=50)
 entry_folder_keyword.grid(row=2, column=1, padx=10, pady=10)
 
-button_folder_keyword = tk.Button(frame_keyword, text="Chọn thư mục", command=lambda: entry_folder_keyword.insert(0, filedialog.askdirectory()))
+button_folder_keyword = tk.Button(frame_keyword, text="Chọn thư mục", 
+                                  command=lambda: [entry_folder_keyword.delete(0, tk.END), 
+                                                   entry_folder_keyword.insert(0, filedialog.askdirectory())])
 button_folder_keyword.grid(row=2, column=2, padx=10, pady=10)
 
 # Nút bắt đầu tìm và tải ảnh
